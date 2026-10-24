@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1a0d09">
+<meta name="description" content="Kaanch Ka Mela — a 3D village-fair ball toss. Three balls. One fragile tower. One very cute teddy bear.">
+<title>Kaanch Ka Mela — 3 Balls, 1 Teddy</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='31' fill='%231a0d09'/%3E%3Ccircle cx='16' cy='17' r='9' fill='%238b5a32'/%3E%3Ccircle cx='48' cy='17' r='9' fill='%238b5a32'/%3E%3Cellipse cx='32' cy='37' rx='20' ry='19' fill='%238b5a32'/%3E%3Cellipse cx='32' cy='43' rx='9' ry='7' fill='%23d7ae79'/%3E%3Ccircle cx='24' cy='34' r='2.4' fill='%231c110b'/%3E%3Ccircle cx='40' cy='34' r='2.4' fill='%231c110b'/%3E%3Cellipse cx='32' cy='41' rx='3' ry='2.2' fill='%231c110b'/%3E%3C/svg%3E">
+<style>/*__STYLE__*/</style>
+</head>
+<body data-mode="intro">
+<div id="app">
+  <canvas id="scene" aria-label="3D village fair stall"></canvas>
+  <div id="grade"></div>
+  <div id="grain"></div>
+  <div id="drunkFx" aria-hidden="true">
+    <span class="haze"></span>
+    <span class="haze b"></span>
+    <span class="swim"></span>
+  </div>
+
+  <!-- ── intro ─────────────────────────────────────────────── -->
+  <section id="intro" class="screen" aria-label="Kaanch Ka Mela intro">
+    <div class="intro-inner">
+      <div class="intro-copy">
+        <div class="intro-topline">
+          <div class="fair-mark" data-i18n="intro.mark">Sarkari Mela · 1987 · Somewhere in UP</div>
+          <div class="lang-switch" role="group" data-i18n-aria="lang.label" aria-label="Language">
+            <button class="lang-btn" data-lang="hi" type="button">हिंदी</button>
+            <button class="lang-btn" data-lang="en" type="button">EN</button>
+          </div>
+        </div>
+        <div class="title-lockup">
+          <h1 class="title-deva deva">काँच का मेला</h1>
+          <div class="title-en">Kaanch Ka Mela</div>
+          <div class="title-stamp">SHETTY<br>ANNA'S<br>STALL ★</div>
+        </div>
+        <p class="intro-lede" data-i18n-html="intro.lede">
+          Between the ferris wheel and the jalebi cart, <b>Shetty Anna</b> runs the loudest stall
+          at the village fair. Three balls. One fragile tower. One very cute
+          <b>teddy bear</b>. <span class="deva">हिम्मत है?</span>
+        </p>
+        <p class="intro-lede" style="font-size:clamp(12px,1.15vw,14px);opacity:.72;max-width:32em;" data-i18n-html="intro.lede2">
+          Pick what you want to break, aim true, and try not to let Anna's commentary
+          get inside your head. He is <i>very</i> good at commentary.
+        </p>
+        <div class="chips">
+          <span class="chip"><i>●</i> <span data-i18n="intro.chip1">3 throws</span></span>
+          <span class="chip"><i>✦</i> <span data-i18n="intro.chip2">Real 3D physics</span></span>
+          <span class="chip"><i>♥</i> <span data-i18n="intro.chip3">1 teddy to win</span></span>
+          <span class="chip"><i>☺</i> <span data-i18n="intro.chip4">1 ego to lose</span></span>
+        </div>
+        <div class="intro-cta">
+          <button id="enterBtn" class="btn"><span data-i18n="intro.enter">Enter the Mela</span> <span class="arrow">→</span></button>
+          <button id="introHelpBtn" class="btn ghost small" data-i18n="intro.help">How to play</button>
+          <span class="micro" data-i18n="intro.micro">Best with sound. Anna's voice is part of the experience.</span>
+        </div>
+      </div>
+    </div>
+    <div class="ticket" aria-hidden="true">
+      <svg class="ticket-teddy" viewBox="0 0 64 64">
+        <circle cx="16" cy="17" r="10" fill="#8b5a32"/><circle cx="48" cy="17" r="10" fill="#8b5a32"/>
+        <circle cx="16" cy="17" r="5" fill="#d7ae79"/><circle cx="48" cy="17" r="5" fill="#d7ae79"/>
+        <ellipse cx="32" cy="36" rx="21" ry="20" fill="#8b5a32"/>
+        <ellipse cx="32" cy="43" rx="10" ry="8" fill="#d7ae79"/>
+        <circle cx="24" cy="33" r="2.6" fill="#1c110b"/><circle cx="40" cy="33" r="2.6" fill="#1c110b"/>
+        <ellipse cx="32" cy="40" rx="3.2" ry="2.4" fill="#1c110b"/>
+        <path d="M29 45q3 3 6 0" fill="none" stroke="#1c110b" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M25 55h14l-2 5H27z" fill="#c63a3a"/>
+      </svg>
+      <div class="ticket-copy">
+        <small data-i18n="ticket.small">Tonight's prize</small>
+        <strong data-i18n="ticket.prize">Ek Teddy Bear</strong>
+        <span data-i18n="ticket.entry">Entry ₹5 · Ego non-refundable</span>
+      </div>
+      <div class="ticket-stub" data-i18n="ticket.stub">Admit One</div>
+    </div>
+    <div class="credit" data-i18n="intro.credit">A village fair original · sound on, chappal off</div>
+  </section>
+
+  <!-- ── target selection ──────────────────────────────────── -->
+  <section id="select" class="screen hidden" aria-label="Choose your target">
+    <button id="backToIntro" class="back-link" data-i18n="select.back">← Back to the mela</button>
+    <div class="lang-switch select-lang" role="group" data-i18n-aria="lang.label" aria-label="Language">
+      <button class="lang-btn" data-lang="hi" type="button">हिंदी</button>
+      <button class="lang-btn" data-lang="en" type="button">EN</button>
+    </div>
+    <div class="select-head">
+      <div class="kicker" data-i18n="select.kicker">Step 1 of 2 · Choose your victim</div>
+      <span class="sanskrit deva">आज क्या तोड़ोगे?</span>
+      <h2 data-i18n="select.title">Aaj kya todoge?</h2>
+      <p data-i18n="select.lede">Every tower is breakable. Some just argue back. Pick one — the rules stay the same:</p>
+    </div>
+    <div class="targets">
+      <button class="target-card" data-target="cups" style="--accent:rgba(227,138,77,.4);--accent-text:#f2ae70" aria-label="Choose Kulhad Cups, easy">
+        <span class="card-icon">
+          <svg viewBox="0 0 64 64" fill="none">
+            <path d="M14 22h31l-3.5 28a6 6 0 0 1-6 5.2H23.5a6 6 0 0 1-6-5.2L14 22Z" fill="#b9633c" stroke="#f0b078" stroke-width="1.8"/>
+            <ellipse cx="29.5" cy="22" rx="15.5" ry="4.4" fill="#d98a5d" stroke="#f0c39a" stroke-width="1.4"/>
+            <ellipse cx="29.5" cy="22" rx="11" ry="2.7" fill="#5b2f1d"/>
+            <path d="M20 36h19" stroke="#f0c39a" stroke-width="1.6" stroke-linecap="round" opacity=".8"/>
+            <path d="M22 43h15" stroke="#8e4125" stroke-width="1.3" stroke-linecap="round" opacity=".7"/>
+            <path d="M44 28c5-1 7 2 6 6-1 3-4 4-7 3" stroke="#b9633c" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <h3 data-i18n="select.cups.name">Kulhad Cups</h3>
+        <div class="hindi deva" data-i18n="select.cups.hindi">कुल्हड़</div>
+        <p class="desc" data-i18n="select.cups.desc">Six clay chai cups, stacked like a pyramid. One clean hit and the whole stall smells like victory.</p>
+        <div class="target-meta">
+          <span class="tag" data-i18n="select.cups.tag">6 cups · topple 4</span>
+          <span class="diff" aria-label="difficulty 1 of 3"><i class="on"></i><i></i><i></i></span>
+        </div>
+      </button>
+
+      <button class="target-card" data-target="glasses" style="--accent:rgba(158,219,228,.38);--accent-text:#bfeef4" aria-label="Choose Kaanch Ke Glass, medium">
+        <span class="card-icon">
+          <svg viewBox="0 0 64 64" fill="none">
+            <path d="M19 9h26l-3.2 44.5c-.1 1.3-1.2 2.3-2.5 2.3H24.7c-1.3 0-2.4-1-2.5-2.3L19 9Z" fill="rgba(158,225,236,.18)" stroke="#bfeef4" stroke-width="2"/>
+            <ellipse cx="32" cy="9" rx="13" ry="3.2" fill="rgba(205,246,252,.22)" stroke="#dffbff" stroke-width="1.4"/>
+            <path d="M21.5 34h21" stroke="#dffbff" stroke-width="1.2" opacity=".55"/>
+            <path d="M24 17h4M23 23h2.5" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+            <ellipse cx="32" cy="52" rx="9" ry="2.4" fill="rgba(200,245,252,.15)"/>
+          </svg>
+        </span>
+        <h3 data-i18n="select.glasses.name">Kaanch Ke Glass</h3>
+        <div class="hindi deva" data-i18n="select.glasses.hindi">काँच के गिलास</div>
+        <p class="desc" data-i18n="select.glasses.desc">Six proud glass tumblers. The classic mela target — beautiful, loud, and absolutely not insured.</p>
+        <div class="target-meta">
+          <span class="tag hot" data-i18n="select.glasses.tag">6 glasses · topple 4</span>
+          <span class="diff" aria-label="difficulty 2 of 3"><i class="on"></i><i class="on"></i><i></i></span>
+        </div>
+      </button>
+
+      <button class="target-card" data-target="crockery" style="--accent:rgba(240,196,107,.36);--accent-text:#f6d48e" aria-label="Choose Crockery Tower, medium">
+        <span class="card-icon">
+          <svg viewBox="0 0 64 64" fill="none">
+            <ellipse cx="32" cy="19" rx="24" ry="5.6" fill="#efe2c9" stroke="#f7d99a" stroke-width="1.4"/>
+            <ellipse cx="32" cy="19" rx="17" ry="3.2" fill="#c7b590"/>
+            <ellipse cx="32" cy="29" rx="21" ry="5" fill="#e3d6bc" stroke="#f7d99a" stroke-width="1.2"/>
+            <ellipse cx="32" cy="38.5" rx="18" ry="4.6" fill="#efe2c9" stroke="#f7d99a" stroke-width="1.2"/>
+            <path d="M17 45c0 5 6.7 9 15 9s15-4 15-9" fill="#d9c9a8" stroke="#f7d99a" stroke-width="1.4"/>
+            <ellipse cx="32" cy="45" rx="15" ry="4" fill="#f3e7cf" stroke="#f7d99a" stroke-width="1.2"/>
+            <path d="M25 9h14l-1.4 5H26.4L25 9Z" fill="#e6d6b8"/>
+          </svg>
+        </span>
+        <h3 data-i18n="select.crockery.name">Crockery Tower</h3>
+        <div class="hindi deva" data-i18n="select.crockery.hindi">शादी का बर्तन</div>
+        <p class="desc" data-i18n="select.crockery.desc">Five wedding plates and four bowls. Amma said not to touch it. Amma is not here.</p>
+        <div class="target-meta">
+          <span class="tag" data-i18n="select.crockery.tag">9 pieces · topple 6</span>
+          <span class="diff" aria-label="difficulty 2 of 3"><i class="on"></i><i class="on"></i><i></i></span>
+        </div>
+      </button>
+
+      <button class="target-card" data-target="buckets" style="--accent:rgba(174,183,186,.32);--accent-text:#ced6d8" aria-label="Choose Steel Buckets, hard">
+        <span class="card-icon">
+          <svg viewBox="0 0 64 64" fill="none">
+            <path d="M18 20h28l-4 36c-.1 1.4-1.3 2.5-2.7 2.5H24.7c-1.4 0-2.6-1.1-2.7-2.5L18 20Z" fill="rgba(190,200,203,.22)" stroke="#ced6d8" stroke-width="2"/>
+            <ellipse cx="32" cy="20" rx="14" ry="4" fill="rgba(220,230,232,.2)" stroke="#e7f0f2" stroke-width="1.6"/>
+            <path d="M21 38h22" stroke="#c1453c" stroke-width="4" opacity=".9"/>
+            <path d="M22 20c0-6 4.5-10 10-10s10 4 10 10" stroke="#9aa4a7" stroke-width="2.2" stroke-linecap="round"/>
+            <ellipse cx="32" cy="17" rx="10" ry="2.4" fill="none" stroke="#9aa4a7" stroke-width="1.4"/>
+          </svg>
+        </span>
+        <h3 data-i18n="select.buckets.name">Steel Buckets</h3>
+        <div class="hindi deva" data-i18n="select.buckets.hindi">लोहे की बाल्टियाँ</div>
+        <p class="desc" data-i18n="select.buckets.desc">Four heavy steel buckets. For players with strong arms, stronger egos, and zero respect for their shoulders.</p>
+        <div class="target-meta">
+          <span class="tag" data-i18n="select.buckets.tag">4 buckets · topple 3</span>
+          <span class="diff" aria-label="difficulty 3 of 3"><i class="on"></i><i class="on"></i><i class="on"></i></span>
+        </div>
+      </button>
+    </div>
+    <div class="select-foot" data-i18n-html="select.foot"><b>Three throws.</b> Every piece has to go down. Teddy is watching. So is everyone else.</div>
+  </section>
+
+  <!-- ── HUD ───────────────────────────────────────────────── -->
+  <div id="hud" class="hidden" aria-hidden="true">
+    <div class="hud-top">
+      <div class="hud-brand">
+        <div class="seal deva">क</div>
+        <div>
+          <small data-i18n="hud.presents">Shetty Anna presents</small>
+          <strong data-i18n="hud.title">Kaanch Ka Mela</strong>
+        </div>
+      </div>
+      <div class="hud-actions">
+        <div class="lang-switch hud-lang" role="group" data-i18n-aria="lang.label" aria-label="Language">
+          <button class="lang-btn" data-lang="hi" type="button">हिं</button>
+          <button class="lang-btn" data-lang="en" type="button">EN</button>
+        </div>
+        <button id="soundBtn" class="icon-btn" data-i18n-aria="hud.sound" data-i18n-title="hud.sound" aria-label="Mute sound" title="Mute sound">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 5 6 9H3v6h3l5 4V5Z" fill="currentColor" fill-opacity=".25"/>
+            <path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>
+          </svg>
+          <span class="mute-slash"></span>
+        </button>
+        <button id="helpBtn" class="icon-btn" data-i18n-aria="hud.help" data-i18n-title="hud.help" aria-label="How to play" title="How to play">?</button>
+      </div>
+    </div>
+    <div class="hud-center">
+      <div class="target-pill"><span class="dot"></span><span id="targetLabel">Kulhad Cups</span></div>
+      <div class="scoreline">
+        <strong id="toppleCount">0</strong><span data-i18n="hud.toppled">toppled</span>
+        <em>/</em><span id="needCount">4</span><span data-i18n="hud.needed">needed</span>
+      </div>
+      <div class="hud-status">
+        <div id="damagePill" class="status-pill damage hidden">
+          <span data-i18n="hud.damage">Stall</span><b id="damageText">pristine</b>
+        </div>
+        <div id="drunkPill" class="status-pill drunk hidden">
+          <span class="drunk-dot"></span><span data-i18n="hud.drunk">Madira · aim shaky</span>
+        </div>
+        <div id="intruderPill" class="status-pill intruder hidden">
+          <span class="buffalo-dot"></span><span data-i18n="hud.intruder">Buffalo on the lane!</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dist-panel" id="distPanel">
+      <div class="dist-read"><span data-i18n="hud.distance">Distance</span><b id="distValue">4.8 m</b></div>
+      <div class="dist-btns">
+        <button id="stepInBtn" class="dist-btn" data-i18n-aria="hud.stepIn" data-i18n-title="hud.stepIn" aria-label="Step closer" title="Step closer">−</button>
+        <button id="stepBackBtn" class="dist-btn" data-i18n-aria="hud.stepBack" data-i18n-title="hud.stepBack" aria-label="Step back" title="Step back">+</button>
+      </div>
+    </div>
+
+    <div id="annaBubble" class="anna-bubble" aria-live="polite">
+      <div class="anna-avatar">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" fill="#a86b40"/>
+          <circle cx="32" cy="36" r="20" fill="#8f5a35"/>
+          <path d="M12 23c4-10 36-14 41 0-3 2-7 3-11 2-3-3-16-4-19 0-4 1-8 0-11-2Z" fill="#dd7c25"/>
+          <path d="M13 23c5 4 33 5 39 0v-2c-5 2-32 2-39 0v2Z" fill="#e9b84f"/>
+          <ellipse cx="32" cy="42" rx="16" ry="14" fill="#a3683f"/>
+          <rect x="19" y="31" width="11" height="7" rx="2.5" fill="#18110d"/>
+          <rect x="35" y="31" width="11" height="7" rx="2.5" fill="#18110d"/>
+          <rect x="29" y="33" width="6" height="2" fill="#18110d"/>
+          <path d="M32 39v4" stroke="#5c331d" stroke-width="2" stroke-linecap="round"/>
+          <path d="M22 46c3-2 6-1 8 1M42 46c-3-2-6-1-8 1" stroke="#1b110b" stroke-width="4" stroke-linecap="round"/>
+          <path d="M26 51c4 3 8 3 12 0" stroke="#3a1c13" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="eq"><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="bubble-paper">
+        <span class="who" data-i18n="hud.who">Shetty Anna</span>
+        <p id="tauntText">Aa gaye? Paisa pehle, beta.</p>
+        <span id="tauntSub" class="sub">So you came? Money first, kid.</span>
+      </div>
+    </div>
+
+    <div class="hud-bottom">
+      <div class="aim-help">
+        <div class="keys">
+          <span class="kbd" data-i18n="hud.move">MOVE</span> <span data-i18n="hud.aim">aim</span>
+          <span class="kbd" data-i18n="hud.hold">HOLD</span> <span data-i18n="hud.charge">charge</span>
+          <span class="kbd" data-i18n="hud.release">RELEASE</span> <span data-i18n="hud.throw">throw</span>
+        </div>
+        <div class="touch-hint" data-i18n="hud.touchHint">Drag to aim · hold longer = farther</div>
+        <div data-i18n-html="hud.brandHint"><b>3 balls.</b> Make them count. Anna is watching.</div>
+      </div>
+      <div class="power-panel" id="powerPanel">
+        <div class="power-label"><span id="powerLabel" data-i18n="hud.powerHold">Hold to charge</span><b id="powerPct">0%</b></div>
+        <div class="power-track">
+          <div class="power-fill" id="powerFill"></div>
+          <div class="power-marks"></div>
+        </div>
+      </div>
+      <div class="throws">
+        <span class="throws-label" data-i18n="hud.ballsLeft">Balls left</span>
+        <div class="ball-row" id="ballRow">
+          <span class="ball-slot"></span><span class="ball-slot"></span><span class="ball-slot"></span>
+        </div>
+      </div>
+    </div>
+    <div id="toast" class="toast" role="status"></div>
+  </div>
+
+  <div id="laughs" aria-hidden="true"></div>
+
+  <!-- ── madira offer ──────────────────────────────────────── -->
+  <section id="offer" class="screen hidden" aria-label="Madira offer">
+    <div class="offer-card" role="dialog" aria-modal="true" aria-labelledby="offerTitle">
+      <div class="offer-kicker" data-i18n="madira.kicker">Between balls · Shetty Anna leans in</div>
+      <div class="offer-top">
+        <div class="offer-bottle" aria-hidden="true">
+          <svg viewBox="0 0 90 160">
+            <defs>
+              <linearGradient id="offerGlass" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#4a2914"/>
+                <stop offset=".34" stop-color="#94612f"/>
+                <stop offset=".62" stop-color="#5b3518"/>
+                <stop offset="1" stop-color="#37200f"/>
+              </linearGradient>
+              <linearGradient id="offerLiquid" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#d6963f"/>
+                <stop offset="1" stop-color="#8b4816"/>
+              </linearGradient>
+            </defs>
+            <path d="M36 8h18v20c0 7 14 14 14 26v84c0 7-5 12-12 12H34c-7 0-12-5-12-12V54c0-12 14-19 14-26Z" fill="url(#offerGlass)" stroke="#2a160a" stroke-width="1.4"/>
+            <path d="M25 80h40v56c0 6-5 11-11 11H36c-6 0-11-5-11-11Z" fill="url(#offerLiquid)" opacity=".88"/>
+            <path d="M32 56c0-8 4-11 6-14v94c-4-2-6-5-6-9Z" fill="#fff" opacity=".16"/>
+            <rect x="33" y="2" width="24" height="10" rx="3" fill="#2b160c"/>
+            <rect x="33" y="2" width="24" height="4" rx="2" fill="#835024"/>
+            <rect x="27" y="88" width="36" height="41" rx="3" fill="#e9d6aa" stroke="#b08a52" stroke-width=".8"/>
+            <text class="deva" x="45" y="107" text-anchor="middle" font-size="12" fill="#5b2a12">मदिरा</text>
+            <text x="45" y="118" text-anchor="middle" font-size="5" letter-spacing="1.6" fill="#8a5a2b">DESI · 1987</text>
+          </svg>
+        </div>
+        <div class="offer-speech">
+          <h2 id="offerTitle" data-i18n="madira.title">Madira, beta?</h2>
+          <p class="offer-quote" data-i18n="madira.quote">“First ball done? Here — a little desi madira for the nerves. Made at home.”</p>
+          <p class="offer-quote sub" data-i18n="madira.quoteSub">“पहला बॉल हो गया? अरे, नसों के लिए थोड़ी देसी मदिरा। घर की बनी है।”</p>
+        </div>
+      </div>
+      <p class="offer-body" data-i18n="madira.body">Anna is smiling too sweetly. The bottle is cloudy, the cap is loose, and the whole stall is watching. It is a trick, obviously.</p>
+      <p class="offer-warn" data-i18n-html="madira.warn"><b>Accept:</b> your aim swims and the world sways for the rest of the round. <b>Refuse:</b> nothing happens.</p>
+      <div class="result-actions offer-actions">
+        <button id="offerAccept" class="btn" type="button" data-i18n="madira.accept">Take a sip</button>
+        <button id="offerRefuse" class="btn ghost" type="button" data-i18n="madira.refuse">Refuse politely</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── result ────────────────────────────────────────────── -->
+  <section id="result" class="screen hidden" data-result="win" aria-label="Result">
+    <div class="result-card">
+      <div class="teddy-badge">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="16" cy="17" r="10" fill="#d7ae79"/><circle cx="48" cy="17" r="10" fill="#d7ae79"/>
+          <circle cx="16" cy="17" r="5" fill="#f3ddb8"/><circle cx="48" cy="17" r="5" fill="#f3ddb8"/>
+          <ellipse cx="32" cy="36" rx="21" ry="20" fill="#d7ae79"/>
+          <ellipse cx="32" cy="43" rx="10" ry="8" fill="#f3ddb8"/>
+          <circle cx="24" cy="33" r="2.6" fill="#1c110b"/><circle cx="40" cy="33" r="2.6" fill="#1c110b"/>
+          <ellipse cx="32" cy="40" rx="3.2" ry="2.4" fill="#1c110b"/>
+          <path d="M29 45q3 3 6 0" fill="none" stroke="#1c110b" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <p class="result-kicker" id="resultKicker">The crowd goes wild</p>
+      <h2 id="resultTitle">Teddy mil gaya!</h2>
+      <p class="result-story" id="resultStory">Shetty Anna is pretending the glass was already cracked. Nobody believes him. The teddy is yours.</p>
+      <div class="result-stats">
+        <div class="result-stat"><b id="statToppled">4</b><span data-i18n="result.toppled">toppled</span></div>
+        <div class="result-stat"><b id="statThrows">3</b><span data-i18n="result.throws">balls used</span></div>
+        <div class="result-stat"><b id="statTarget">Glass</b><span data-i18n="result.target">target</span></div>
+      </div>
+      <div class="result-actions">
+        <button id="againBtn" class="btn">Play again <span class="arrow">↻</span></button>
+        <button id="changeBtn" class="btn ghost" data-i18n="result.change">Change target</button>
+      </div>
+      <p class="result-quote" id="resultQuote">“Take the teddy. Next time, double price.” — Shetty Anna</p>
+    </div>
+  </section>
+
+  <!-- ── help ──────────────────────────────────────────────── -->
+  <section id="help" class="screen hidden" aria-label="How to play">
+    <div class="help-card">
+      <div class="kicker" data-i18n="help.kicker">The rules of the mela</div>
+      <h2 data-i18n="help.title">How to lose gracefully</h2>
+      <ol>
+        <li data-i18n-html="help.li1"><b>Pick a target.</b> Cups are kind. Buckets are not.</li>
+        <li data-i18n-html="help.li2"><b>Aim</b> by moving your mouse or dragging a finger. The golden ring is where a full-power throw will land.</li>
+        <li data-i18n-html="help.li3"><b>Hold</b> to charge, then <b>release</b> to throw. A quick tap drops short — hold longer to throw farther and hit harder.</li>
+        <li data-i18n-html="help.li4">You get <b>three balls</b>. Every single piece has to go down to win the teddy.</li>
+        <li data-i18n-html="help.li5">The <b>shopkeeper and the prize teddy</b> are hittable too. Watch the stall take visible damage.</li>
+        <li data-i18n-html="help.li6">Sometimes a <b>buffalo</b> wanders onto the lane. Hit it to shoo it — but that ball is spent.</li>
+        <li data-i18n-html="help.li7">Hit Anna and he will <b>step you back</b>. Farther throws are harder to aim.</li>
+        <li data-i18n-html="help.li8">If you fail, the crowd laughs. Anna laughs louder. That is the real prize.</li>
+        <li data-i18n-html="help.li9">After your first ball, Anna offers you <b>madira</b>. It is a trick. Refuse, or drink up and fight the wobble.</li>
+      </ol>
+      <p class="help-note" data-i18n-html="help.note">The stall is run by <b>Shetty Anna</b>. His commentary is included at no extra cost. Sound can be muted with the speaker button.</p>
+      <div class="result-actions">
+        <button id="helpClose" class="btn" data-i18n="help.close">Got it, Anna</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>/*__SCRIPT__*/</script>
+</body>
+</html>
