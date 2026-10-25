@@ -29,15 +29,23 @@ async function start(id) {
 }
 async function shot(x, y, p = 1) {
   await page.evaluate((x, y, p) => KaanchKaMela.throwAt(x, y, p), x, y, p);
-  await waitMode(['aim', 'win', 'lose'], 45000).catch(() => {});
-  await sleep(350);
+  await waitMode(['aim', 'win', 'lose', 'offer'], 45000).catch(() => {});
+  if (await page.evaluate(() => KaanchKaMela.state.mode === 'offer')) {
+    for (let tries = 0; tries < 3 && await page.evaluate(() => KaanchKaMela.state.mode === 'offer'); tries++) {
+      await sleep(800);
+      await page.evaluate(() => document.getElementById('offerRefuse').click());
+      await sleep(500);
+    }
+    await waitMode(['aim', 'win', 'lose'], 45000).catch(() => {});
+  }
+  await sleep(650);
   return snap();
 }
 const plans = {
-  cups: [[0, 1.33], [-0.8, 1.2], [0.8, 1.2]],
-  glasses: [[0, 1.36], [-0.8, 1.26], [0.8, 1.26]],
-  crockery: [[-0.62, 1.31], [0.62, 1.2]],
-  buckets: [[-0.6, 1.72], [0.6, 1.72]],
+  cups: [[0, 1.26], [-0.85, 1.26], [0.85, 1.26]],
+  glasses: [[0, 1.26], [-0.85, 1.26], [0.85, 1.26]],
+  crockery: [[-1.18, 1.26], [0, 1.26], [0.9, 1.26]],
+  buckets: [[-1.05, 1.45], [0, 1.45], [1.05, 1.45]],
 };
 let fails = 0;
 for (const [id, plan] of Object.entries(plans)) {
@@ -52,11 +60,11 @@ for (const [id, plan] of Object.entries(plans)) {
 }
 // charge response on the production bundle
 await start('cups');
-console.log('weak tap', await shot(0, 1.33, 0.3));
+console.log('weak tap', await shot(0, 1.26, 0.3));
 await start('cups');
-console.log('half hold', await shot(0, 1.33, 0.6));
+console.log('half hold', await shot(0, 1.26, 0.6));
 await start('cups');
-console.log('full hold', await shot(0, 1.33, 1));
+console.log('full hold', await shot(0, 1.26, 1));
 console.log('ERRORS', errors.length ? errors : 'none');
 console.log('FAILS', fails);
 await browser.close();

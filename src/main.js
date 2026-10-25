@@ -243,6 +243,7 @@ function setLanguage(lang, announce = false) {
   try { localStorage.setItem('kaancha-lang', next); } catch (_) {}
   applyLanguage();
   audio.setLanguage(next);
+  if (currentAnnaLine) setAnnaText(currentAnnaLine);
   updateHUD();
   updatePowerUI();
   if (state.resultShown && state.def) renderResult(resultEl.dataset.result === 'win');
@@ -674,11 +675,16 @@ function cleanupTarget() {
 
 /* ── Anna ────────────────────────────────────────────────────── */
 let speakingTimer = null;
-function annaSay(line, opts = {}) {
-  if (!line) return;
+let currentAnnaLine = null;
+function setAnnaText(line) {
   const hi = state.lang === 'hi';
   tauntText.textContent = (hi ? line.hi : line.en) || line.text || '';
   tauntSub.textContent = (hi ? line.en : line.hi) || '';
+}
+function annaSay(line, opts = {}) {
+  if (!line) return;
+  currentAnnaLine = line;
+  setAnnaText(line);
   annaBubble.classList.add('show');
   annaBubble.classList.remove('pop');
   void annaBubble.offsetWidth;
@@ -1361,6 +1367,10 @@ window.addEventListener('pointercancel', () => {
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 
 window.addEventListener('keydown', e => {
+  if (state.mode === 'offer') {
+    if (e.key === 'Escape') { e.preventDefault(); refuseMadira(); }
+    return;
+  }
   if (e.code === 'Space') {
     if (state.mode === 'aim' && state.canThrow && !state.pointerDown) {
       e.preventDefault();
@@ -1523,6 +1533,10 @@ function closeHelp() {
 $('helpBtn').addEventListener('click', openHelp);
 $('helpClose').addEventListener('click', closeHelp);
 
+/* madira offer */
+$('offerAccept').addEventListener('click', acceptMadira);
+$('offerRefuse').addEventListener('click', refuseMadira);
+
 /* ── laughs ─────────────────────────────────────────────────── */
 (function buildLaughs() {
   const words = ['HA!', 'HA HA!', 'HEE HEE!', 'OHO!', 'HA HA HA!', 'AYYO!', 'HA!', 'HEE!'];
@@ -1651,6 +1665,7 @@ function animate(now) {
   }
 
   // camera smoothing
+  const boozy = state.drunk && ['aim', 'charging', 'flying', 'resolving', 'offer'].includes(state.mode);
   const lerpK = 1 - Math.exp(-dt * 2.1);
   camPos.lerp(targetPos, lerpK);
   camLook.lerp(targetLook, lerpK);
@@ -1665,7 +1680,17 @@ function animate(now) {
     _v.y += (Math.random() - 0.5) * amp * 0.3;
     camera.lookAt(_v);
   } else {
-    camera.lookAt(camLook);
+    _v.copy(camLook);
+    if (boozy) {
+      _v.x += Math.sin(now / 640) * 0.045;
+      _v.y += Math.sin(now / 470 + 0.9) * 0.03;
+    }
+    camera.lookAt(_v);
+  }
+  if (boozy) {
+    camera.position.x += Math.sin(now / 520) * 0.03;
+    camera.position.y += Math.sin(now / 410 + 1.1) * 0.022;
+    camera.rotateZ(Math.sin(now / 610) * 0.018 + Math.sin(now / 263) * 0.006);
   }
   // tiny idle camera breathing
   if (state.mode === 'intro' || state.mode === 'select') {
@@ -1710,6 +1735,11 @@ window.KaanchKaMela = {
   get lang() { return state.lang; },
   get damage() { return state.damage; },
   get buffaloActive() { return state.buffaloActive; },
+  get drunk() { return state.drunk; },
+  get offerOpen() { return state.mode === 'offer'; },
+  wobble: () => aimWobble(performance.now()),
+  acceptMadira,
+  refuseMadira,
   startRun,
   setLanguage: lang => setLanguage(lang, false),
   stepBack: () => changeDistance(DIST_STEP),

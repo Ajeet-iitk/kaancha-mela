@@ -120,7 +120,12 @@ try {
   })));
   await shot('05-buffalo-shooed');
   // wait for the throw to resolve and the chance to be consumed
-  await page.waitForFunction(() => ['aim', 'lose', 'win'].includes(KaanchKaMela.state.mode), { timeout: 30000 }).catch(() => {});
+  await page.waitForFunction(() => ['aim', 'lose', 'win', 'offer'].includes(KaanchKaMela.state.mode), { timeout: 30000 }).catch(() => {});
+  if (await page.evaluate(() => KaanchKaMela.state.mode === 'offer')) {
+    await sleep(700);
+    await page.click('#offerRefuse');
+    await page.waitForFunction(() => ['aim', 'lose', 'win'].includes(KaanchKaMela.state.mode), { timeout: 20000 }).catch(() => {});
+  }
   await sleep(400);
   console.log('after buffalo ball', await state());
 

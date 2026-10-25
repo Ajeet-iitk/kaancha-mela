@@ -172,10 +172,10 @@ function makeItem(ctx, mesh, shape, pos, opts) {
 function buildCups(ctx) {
   const items = [];
   const h = 0.19;
-  // three little two-cup towers: one ball can only wreck one tower
-  const towers = [-0.8, 0, 0.8];
+  // three five-cup towers: one ball can only wreck one tower
+  const towers = [-0.85, 0, 0.85];
   for (const tx of towers) {
-    for (let row = 0; row < 2; row++) {
+    for (let row = 0; row < 5; row++) {
       const x = tx;
       const y = TABLE_TOP + h / 2 + row * h + 0.002;
       const mesh = cupMesh(0.15, 0.1, h);
@@ -192,10 +192,10 @@ function buildCups(ctx) {
 function buildGlasses(ctx) {
   const items = [];
   const h = 0.27;
-  // three glass towers, deliberately out of reach of a single hit
-  const towers = [-0.8, 0, 0.8];
+  // three five-glass towers, deliberately out of reach of a single hit
+  const towers = [-0.85, 0, 0.85];
   for (const tx of towers) {
-    for (let row = 0; row < 2; row++) {
+    for (let row = 0; row < 5; row++) {
       const x = tx;
       const y = TABLE_TOP + h / 2 + row * h + 0.003;
       const mesh = glassMesh(0.094, 0.079, h);
@@ -216,34 +216,47 @@ function buildCrockery(ctx) {
   const standH = 0.1;
   const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.17, standH, 18), M.wood);
   items.push(makeItem(ctx, stand, new CANNON.Cylinder(0.14, 0.17, standH, 14),
-    { x: -0.62, y: TABLE_TOP + standH / 2, z: 0 }, {
+    { x: -0.9, y: TABLE_TOP + standH / 2, z: 0 }, {
       mass: 0, material: physicsMaterials.wood, sound: 'wood', kind: 'wood',
       name: 'Plate stand', radius: 0.17,
     }));
   // wedding plates on the left...
   const ph = 0.052;
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 5; i++) {
     const y = TABLE_TOP + standH + ph / 2 + i * ph + 0.002;
     const mesh = plateMesh(0.35, ph, i);
     items.push(makeItem(ctx, mesh, new CANNON.Cylinder(0.35, 0.35, ph, 16),
-      { x: -0.62, y, z: 0 }, {
+      { x: -0.9, y, z: 0 }, {
         mass: 0.3, material: physicsMaterials.china, sound: 'china', kind: 'china',
         name: `Plate ${i + 1}`, radius: 0.35, isPlate: true,
         rotation: { y: (i % 2) * 0.2 },
-        angularDamping: 0.32,
+        angularDamping: 0.12,
       }));
   }
-  // ...and the bowls on the right, too far apart to share a hit
+  // ...a middle tower of little katoris...
+  const kh = 0.11;
+  for (let i = 0; i < 5; i++) {
+    const y = TABLE_TOP + kh / 2 + i * (kh + 0.002);
+    const mesh = bowlMesh(0.2, 0.11, kh, i + 1);
+    items.push(makeItem(ctx, mesh, new CANNON.Cylinder(0.2, 0.11, kh, 14),
+      { x: 0, y, z: 0 }, {
+        mass: 0.2, material: physicsMaterials.china, sound: 'china', kind: 'china',
+        name: `Katori ${i + 1}`, radius: 0.2,
+        rotation: { y: i * 0.5 },
+        angularDamping: 0.12,
+      }));
+  }
+  // ...and the big bowls on the right, too far apart to share a hit
   const bh = 0.12;
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 6; i++) {
     const y = TABLE_TOP + bh / 2 + i * (bh + 0.002);
     const mesh = bowlMesh(0.22, 0.12, bh, i);
     items.push(makeItem(ctx, mesh, new CANNON.Cylinder(0.22, 0.12, bh, 12),
-      { x: 0.62, y, z: 0 }, {
+      { x: 0.9, y, z: 0 }, {
         mass: 0.26, material: physicsMaterials.china, sound: 'china', kind: 'china',
         name: `Bowl ${i + 1}`, radius: 0.22,
         rotation: { y: i * 0.7 },
-        angularDamping: 0.4,
+        angularDamping: 0.14,
       }));
   }
   return items;
@@ -252,20 +265,25 @@ function buildCrockery(ctx) {
 function buildBuckets(ctx) {
   const items = [];
   const h = 0.43;
-  // two separate two-bucket columns: one ball can clear one column, but
-  // never both, so a full sweep takes real aim and at least two balls
-  for (const sx of [-0.6, 0.6]) {
+  // three separate two-bucket columns: one ball can clear one column, but
+  // never all three, so every throw has to count
+  const columns = [
+    { x: -1.05, tag: 'L' },
+    { x: 0, tag: 'M' },
+    { x: 1.05, tag: 'R' },
+  ];
+  for (const col of columns) {
     for (let row = 0; row < 2; row++) {
       const y = TABLE_TOP + h / 2 + row * (h + 0.004) + 0.002;
       const mesh = bucketMesh(0.245, 0.19, h);
-      const yaw = row === 0 ? (sx < 0 ? 0.5 : -0.4) : 0.9;
+      const yaw = row === 0 ? (col.x < 0 ? 0.5 : col.x > 0 ? -0.4 : 0.15) : 0.9;
       mesh.rotation.y = yaw;
       items.push(makeItem(ctx, mesh, new CANNON.Cylinder(0.245, 0.19, h, 14),
-        { x: sx, y, z: 0 }, {
+        { x: col.x, y, z: 0 }, {
           mass: 1.55, material: physicsMaterials.steel, sound: 'steel', kind: 'steel',
-          name: row === 0 ? `Bucket ${sx < 0 ? 'L' : 'R'}` : `Top Bucket ${sx < 0 ? 'L' : 'R'}`,
+          name: row === 0 ? `Bucket ${col.tag}` : row === 1 ? `Upper Bucket ${col.tag}` : `Top Bucket ${col.tag}`,
           radius: 0.245,
-          angularDamping: 0.18, linearDamping: 0.02,
+          angularDamping: 0.34, linearDamping: 0.14,
           rotation: { y: yaw },
         }));
     }
@@ -276,8 +294,8 @@ function buildBuckets(ctx) {
 export const TARGETS = {
   cups: {
     id: 'cups', name: 'Kulhad Cups', hindi: 'कुल्हड़', icon: 'cups',
-    desc: 'Six clay chai cups in three little towers. One clean hit only wrecks one tower, so make every ball count.',
-    tag: '6 cups · topple all', diff: 1, total: 6, required: 6, aimY: 1.33, aimX: 0,
+    desc: 'Fifteen clay chai cups in three tall towers. One clean hit only wrecks one tower, so make every ball count.',
+    tag: '15 cups · topple all', diff: 1, total: 15, required: 15, aimY: 1.26, aimX: 0,
     accent: '#e38a4d', accentText: '#f2ae70', sound: 'clay',
     winLine: 'Kulhad khatam, chai baaki!',
     build: buildCups,
@@ -285,8 +303,8 @@ export const TARGETS = {
   },
   glasses: {
     id: 'glasses', name: 'Kaanch Ke Glass', hindi: 'काँच के गिलास', icon: 'glass',
-    desc: 'Six proud glass tumblers in three towers. Beautiful, loud, and absolutely not insured.',
-    tag: '6 glasses · topple all', diff: 2, total: 6, required: 6, aimY: 1.36, aimX: 0,
+    desc: 'Fifteen proud glass tumblers in three towers. Beautiful, loud, and absolutely not insured.',
+    tag: '15 glasses · topple all', diff: 2, total: 15, required: 15, aimY: 1.26, aimX: 0,
     accent: '#9edbe4', accentText: '#bfeef4', sound: 'glass',
     winLine: 'Kaanch gaya, kaanch gaya!',
     build: buildGlasses,
@@ -294,8 +312,8 @@ export const TARGETS = {
   },
   crockery: {
     id: 'crockery', name: 'Crockery Tower', hindi: 'शादी का बर्तन', icon: 'plates',
-    desc: 'Three wedding plates on the left, four bowls on the right. Amma said not to touch it. Amma is not here.',
-    tag: '7 pieces · topple all', diff: 3, total: 7, required: 7, aimY: 1.31, aimX: -0.62,
+    desc: 'Five wedding plates on the left, five katoris in the middle, six big bowls on the right. Amma said not to touch it. Amma is not here.',
+    tag: '16 pieces · topple all', diff: 3, total: 16, required: 16, aimY: 1.26, aimX: -1.18,
     accent: '#f0c46b', accentText: '#f6d48e', sound: 'china',
     winLine: 'Amma ki thali, Shetty ki tension!',
     build: buildCrockery,
@@ -303,8 +321,8 @@ export const TARGETS = {
   },
   buckets: {
     id: 'buckets', name: 'Steel Buckets', hindi: 'लोहे की बाल्टियाँ', icon: 'bucket',
-    desc: 'Four heavy steel buckets. Every single one has to hit the dirt.',
-    tag: '4 buckets · topple all', diff: 4, total: 4, required: 4, aimY: 1.72, aimX: -0.6,
+    desc: 'Six heavy steel buckets in three tall columns. Every single one has to hit the dirt, and they do not fall politely.',
+    tag: '6 buckets · topple all', diff: 4, total: 6, required: 6, aimY: 1.45, aimX: -1.05,
     accent: '#aeb7ba', accentText: '#ced6d8', sound: 'steel',
     winLine: 'Balte gir gaye? Arre wah!',
     build: buildBuckets,

@@ -36,7 +36,12 @@ async function throwAndWait(x, y, p, label) {
   const t = Date.now();
   await page.evaluate((x, y, p) => window.KaanchKaMela.throwAt(x, y, p), x, y, p);
   await waitMode(['aim', 'win', 'lose', 'resolving'], 45000).catch(() => {});
-  await waitMode(['aim', 'win', 'lose'], 45000).catch(() => {});
+  await waitMode(['aim', 'win', 'lose', 'offer'], 45000).catch(() => {});
+  if (await page.evaluate(() => window.KaanchKaMela.state.mode === 'offer')) {
+    await sleep(700);
+    await page.click('#offerRefuse');
+    await waitMode(['aim', 'win', 'lose'], 45000).catch(() => {});
+  }
   await sleep(250);
   const s = await snap();
   s.seconds = ((Date.now() - t) / 1000).toFixed(2);
@@ -79,9 +84,9 @@ try {
   // ── glasses: must clear all three towers ──────────────────────
   await pickTarget('glasses');
   await shot('42-play');
-  let r = await throwAndWait(0, 1.36, 1, 'glasses 1');
-  if (r.mode === 'aim') r = await throwAndWait(-0.8, 1.26, 1, 'glasses 2');
-  if (r.mode === 'aim') r = await throwAndWait(0.8, 1.26, 1, 'glasses 3');
+  let r = await throwAndWait(0, 1.26, 1, 'glasses 1');
+  if (r.mode === 'aim') r = await throwAndWait(-0.85, 1.26, 1, 'glasses 2');
+  if (r.mode === 'aim') r = await throwAndWait(0.85, 1.26, 1, 'glasses 3');
   await sleep(2600);
   await shot('43-glasses-result');
   console.log('glasses resultShown', await page.evaluate(() => ({
@@ -92,16 +97,17 @@ try {
 
   // ── cups: all six kulhads ─────────────────────────────────────
   await changeTarget('cups');
-  r = await throwAndWait(0, 1.33, 1, 'cups 1');
-  if (r.mode === 'aim') r = await throwAndWait(-0.8, 1.2, 1, 'cups 2');
-  if (r.mode === 'aim') r = await throwAndWait(0.8, 1.2, 1, 'cups 3');
+  r = await throwAndWait(0, 1.26, 1, 'cups 1');
+  if (r.mode === 'aim') r = await throwAndWait(-0.85, 1.26, 1, 'cups 2');
+  if (r.mode === 'aim') r = await throwAndWait(0.85, 1.26, 1, 'cups 3');
   await sleep(2400);
   await shot('44-cups-result');
 
   // ── crockery: plates then bowls ───────────────────────────────
   await changeTarget('crockery');
-  r = await throwAndWait(-0.62, 1.31, 1, 'crockery 1');
-  if (r.mode === 'aim') r = await throwAndWait(0.62, 1.2, 1, 'crockery 2');
+  r = await throwAndWait(-1.18, 1.26, 1, 'crockery 1');
+  if (r.mode === 'aim') r = await throwAndWait(0, 1.26, 1, 'crockery 2');
+  if (r.mode === 'aim') r = await throwAndWait(0.9, 1.26, 1, 'crockery 3');
   if (r.mode === 'aim') {
     const t = await page.evaluate(() => {
       const st = KaanchKaMela.state.target.items
@@ -118,7 +124,7 @@ try {
 
   // ── buckets: one column per ball ──────────────────────────────
   await changeTarget('buckets');
-  r = await throwAndWait(-0.6, 1.72, 1, 'buckets 1');
+  r = await throwAndWait(-1.05, 1.45, 1, 'buckets 1');
   for (let i = 0; i < 2 && r.mode === 'aim'; i++) {
     const t = await page.evaluate(() => {
       const st = KaanchKaMela.state.target.items.filter(it => !it.fallen);

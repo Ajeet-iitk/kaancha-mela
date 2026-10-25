@@ -493,7 +493,6 @@ export class MelaAudio {
 
   taunt(line, lang) {
     if (!this.ctx || this.muted || !('speechSynthesis' in window)) return;
-    const useHi = (lang || this.lang) === 'hi';
     const synth = window.speechSynthesis;
     try {
       const now = performance.now();
@@ -501,16 +500,20 @@ export class MelaAudio {
       this._lastSpeech = now;
       synth.cancel();
       const u = new SpeechSynthesisUtterance();
-      if (useHi) {
-        u.text = line.hi || line.en || line.text || '';
-        if (this.hiVoice) u.voice = this.hiVoice;
-        u.lang = this.hiVoice?.lang || 'hi-IN';
+      // Shetty Anna is a Hindi-speaking shopkeeper. With a Hindi voice he reads
+      // the Devanagari line; without one he speaks the Roman-Hindi line with an
+      // Indian-English voice so the delivery still sounds like Hindi.
+      if (this.hiVoice) {
+        u.text = line.hi || line.text || line.en || '';
+        u.lang = this.hiVoice.lang || 'hi-IN';
+        try { u.voice = this.hiVoice; } catch (_) {}
       } else {
-        u.text = line.en || line.text || line.hi || '';
-        if (this.enVoice) u.voice = this.enVoice;
+        u.text = line.text || line.en || line.hi || '';
         u.lang = this.enVoice?.lang || 'en-IN';
+        try { if (this.enVoice) u.voice = this.enVoice; } catch (_) {}
       }
-      u.rate = 0.94;
+      if (!u.text) return;
+      u.rate = 0.92;
       u.pitch = 0.72;
       u.volume = 1;
       if (this.onSpeaking) {
